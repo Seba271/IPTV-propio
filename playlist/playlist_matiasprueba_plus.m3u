@@ -1,0 +1,100 @@
+#EXTM3U
+#EXT-X-SESSION-DATA:DATA-ID="com.xui.1_5_12r2"
+#EXTINF:-1 tvg-id="0205" tvg-name="DW ESPAÑOL" tvg-logo="" group-title="CANALES-HD",DW ESPAÑOL
+http://iptv.ctvc.cl:80/matiasprueba/81237978/11.ts
+#EXTINF:-1 tvg-id="0205" tvg-name="DW ESPAÑOL" tvg-logo="" group-title="CULTURA",DW ESPAÑOL
+http://iptv.ctvc.cl:80/matiasprueba/81237978/11.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="13 SERIES" tvg-logo="" group-title="NACIONALES",13 SERIES
+http://iptv.ctvc.cl:80/matiasprueba/81237978/12.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="13 SERIES" tvg-logo="" group-title="CANALES-HD",13 SERIES
+http://iptv.ctvc.cl:80/matiasprueba/81237978/12.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="ADN RADIO" tvg-logo="" group-title="NACIONALES",ADN RADIO
+http://iptv.ctvc.cl:80/matiasprueba/81237978/13.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="ADN RADIO" tvg-logo="" group-title="CANALES-HD",ADN RADIO
+http://iptv.ctvc.cl:80/matiasprueba/81237978/13.ts
+#EXTINF:-1 tvg-id="0113" tvg-name="13 CABLE" tvg-logo="" group-title="NACIONALES",13 CABLE
+http://iptv.ctvc.cl:80/matiasprueba/81237978/14.ts
+#EXTINF:-1 tvg-id="0113" tvg-name="13 CABLE" tvg-logo="" group-title="CANALES-HD",13 CABLE
+http://iptv.ctvc.cl:80/matiasprueba/81237978/14.ts
+#EXTINF:-1 tvg-id="0839" tvg-name="+ CINE" tvg-logo="" group-title="CANALES-HD",+ CINE
+http://iptv.ctvc.cl:80/matiasprueba/81237978/15.ts
+#EXTINF:-1 tvg-id="0839" tvg-name="+ CINE" tvg-logo="" group-title="SERIES-PELICULAS",+ CINE
+http://iptv.ctvc.cl:80/matiasprueba/81237978/15.ts
+#EXTINF:-1 tvg-id="" tvg-name="KIDOO" tvg-logo="" group-title="CANALES-HD",KIDOO
+http://iptv.ctvc.cl:80/matiasprueba/81237978/19.ts
+#EXTINF:-1 tvg-id="" tvg-name="KIDOO" tvg-logo="" group-title="INFANTILES",KIDOO
+http://iptv.ctvc.cl:80/matiasprueba/81237978/19.ts
+#EXTINF:-1 tvg-id="" tvg-name="FMH KIDS" tvg-logo="" group-title="CANALES-HD",FMH KIDS
+http://iptv.ctvc.cl:80/matiasprueba/81237978/21.ts
+#EXTINF:-1 tvg-id="" tvg-name="FMH KIDS" tvg-logo="" group-title="INFANTILES",FMH KIDS
+http://iptv.ctvc.cl:80/matiasprueba/81237978/21.ts
+#EXTINF:-1 tvg-id="" tvg-name="DOS KIDS" tvg-logo="" group-title="CANALES-HD",DOS KIDS
+http://iptv.ctvc.cl:80/matiasprueba/81237978/23.ts
+#EXTINF:-1 tvg-id="" tvg-name="DOS KIDS" tvg-logo="" group-title="INFANTILES",DOS KIDS
+http://iptv.ctvc.cl:80/matiasprueba/81237978/23.ts
+#EXTINF:-1 tvg-id="0802" tvg-name="DHE HD" tvg-logo="" group-title="CANALES-HD",DHE HD
+http://iptv.ctvc.cl:80/matiasprueba/81237978/46.ts
+#EXTINF:-1 tvg-id="0802" tvg-name="DHE HD" tvg-logo="" group-title="SERIES-PELICULAS",DHE HD
+http://iptv.ctvc.cl:80/matiasprueba/81237978/46.ts
+#EXTINF:-1 tvg-id="" tvg-name="FITMAXX" tvg-logo="" group-title="CANALES-HD",FITMAXX
+http://iptv.ctvc.cl:80/matiasprueba/81237978/30.ts
+#EXTINF:-1 tvg-id="" tvg-name="FITMAXX" tvg-logo="" group-title="DEPORTES",FITMAXX
+http://iptv.ctvc.cl:80/matiasprueba/81237978/30.ts
+#EXTINF:-1 tvg-id="" tvg-name="SPORTS ETX" tvg-logo="" group-title="CANALES-HD",SPORTS ETX
+http://iptv.ctvc.cl:80/matiasprueba/81237978/29.ts
+#EXTINF:-1 tvg-id="" tvg-name="SPORTS ETX" tvg-logo="" group-title="DEPORTES",SPORTS ETX
+http://iptv.ctvc.cl:80/matiasprueba/81237978/29.ts
+#EXTINF:-1 tvg-id="" tvg-name="REDBULL TV" tvg-logo="" group-title="CANALES-HD",REDBULL TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/28.ts
+#EXTINF:-1 tvg-id="" tvg-name="REDBULL TV" tvg-logo="" group-title="DEPORTES",REDBULL TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/28.ts
+#EXTINF:-1 tvg-id="" tvg-name="SENPAI TV" tvg-logo="" group-title="CANALES-HD",SENPAI TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/24.ts
+#EXTINF:-1 tvg-id="" tvg-name="SENPAI TV" tvg-logo="" group-title="INFANTILES",SENPAI TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/24.ts
+#EXTINF:-1 tvg-id="0836" tvg-name="AMC HD" tvg-logo="" group-title="CANALES-HD",AMC HD
+http://iptv.ctvc.cl:80/matiasprueba/81237978/47.ts
+#EXTINF:-1 tvg-id="0803" tvg-name="PARAMOUNT CHANNEL HD" tvg-logo="" group-title="CANALES-HD",PARAMOUNT CHANNEL HD
+http://iptv.ctvc.cl:80/matiasprueba/81237978/56.ts
+#EXTINF:-1 tvg-id="0803" tvg-name="PARAMOUNT CHANNEL HD" tvg-logo="" group-title="SERIES-PELICULAS",PARAMOUNT CHANNEL HD
+http://iptv.ctvc.cl:80/matiasprueba/81237978/56.ts
+#EXTINF:-1 tvg-id="" tvg-name="MX FAMILY" tvg-logo="" group-title="CANALES-HD",MX FAMILY
+http://iptv.ctvc.cl:80/matiasprueba/81237978/57.ts
+#EXTINF:-1 tvg-id="" tvg-name="MX FAMILY" tvg-logo="" group-title="SERIES-PELICULAS",MX FAMILY
+http://iptv.ctvc.cl:80/matiasprueba/81237978/57.ts
+#EXTINF:-1 tvg-id="" tvg-name="MX CLASIC" tvg-logo="" group-title="CANALES-HD",MX CLASIC
+http://iptv.ctvc.cl:80/matiasprueba/81237978/60.ts
+#EXTINF:-1 tvg-id="" tvg-name="MX CLASIC" tvg-logo="" group-title="SERIES-PELICULAS",MX CLASIC
+http://iptv.ctvc.cl:80/matiasprueba/81237978/60.ts
+#EXTINF:-1 tvg-id="0612" tvg-name="KANAL DRAMA" tvg-logo="" group-title="CANALES-HD",KANAL DRAMA
+http://iptv.ctvc.cl:80/matiasprueba/81237978/63.ts
+#EXTINF:-1 tvg-id="0612" tvg-name="KANAL DRAMA" tvg-logo="" group-title="ENTRETENCIÓN",KANAL DRAMA
+http://iptv.ctvc.cl:80/matiasprueba/81237978/63.ts
+#EXTINF:-1 tvg-id="" tvg-name="MUNDO SABOR" tvg-logo="" group-title="CANALES-HD",MUNDO SABOR
+http://iptv.ctvc.cl:80/matiasprueba/81237978/76.ts
+#EXTINF:-1 tvg-id="" tvg-name="MUNDO SABOR" tvg-logo="" group-title="CULTURA",MUNDO SABOR
+http://iptv.ctvc.cl:80/matiasprueba/81237978/76.ts
+#EXTINF:-1 tvg-id="" tvg-name="LADIES" tvg-logo="" group-title="CANALES-HD",LADIES
+http://iptv.ctvc.cl:80/matiasprueba/81237978/77.ts
+#EXTINF:-1 tvg-id="" tvg-name="LADIES" tvg-logo="" group-title="ENTRETENCIÓN",LADIES
+http://iptv.ctvc.cl:80/matiasprueba/81237978/77.ts
+#EXTINF:-1 tvg-id="" tvg-name="DOS" tvg-logo="" group-title="CANALES-HD",DOS
+http://iptv.ctvc.cl:80/matiasprueba/81237978/78.ts
+#EXTINF:-1 tvg-id="" tvg-name="DOS" tvg-logo="" group-title="ENTRETENCIÓN",DOS
+http://iptv.ctvc.cl:80/matiasprueba/81237978/78.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="MX SERIES" tvg-logo="" group-title="CANALES-HD",MX SERIES
+http://iptv.ctvc.cl:80/matiasprueba/81237978/87.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="MX SERIES" tvg-logo="" group-title="SERIES-PELICULAS",MX SERIES
+http://iptv.ctvc.cl:80/matiasprueba/81237978/87.ts
+#EXTINF:-1 tvg-id="" tvg-name="CARACOLA TV" tvg-logo="" group-title="CANALES-HD",CARACOLA TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/92.ts
+#EXTINF:-1 tvg-id="" tvg-name="CARACOLA TV" tvg-logo="" group-title="ENTRETENCIÓN",CARACOLA TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/92.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="KARAVANA URBANO" tvg-logo="" group-title="CANALES-HD",KARAVANA URBANO
+http://iptv.ctvc.cl:80/matiasprueba/81237978/94.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="KARAVANA URBANO" tvg-logo="" group-title="MÚSICA",KARAVANA URBANO
+http://iptv.ctvc.cl:80/matiasprueba/81237978/94.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="KARAVANA TV" tvg-logo="" group-title="CANALES-HD",KARAVANA TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/95.ts
+#EXTINF:-1 tvg-id="0000" tvg-name="KARAVANA TV" tvg-logo="" group-title="MÚSICA",KARAVANA TV
+http://iptv.ctvc.cl:80/matiasprueba/81237978/95.ts
