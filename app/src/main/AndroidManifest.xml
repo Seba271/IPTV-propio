@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Manifest principal de la aplicación que define los permisos, actividades y configuración general -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permisos necesarios para la aplicación -->
-    <!-- Permiso para acceder a Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Permiso para verificar el estado de la conexión a Internet -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Configuración principal de la aplicación -->
@@ -21,20 +17,16 @@
         android:theme="@style/Theme.IPTVPruebaDesdeCero"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-
-        <!-- Actividad principal de la aplicación -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar">
-            <!-- Filtro de intención para que esta actividad sea el punto de entrada de la aplicación -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Actividad del reproductor de video -->
         <activity
             android:name=".PlayerActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"

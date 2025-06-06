@@ -2,6 +2,7 @@ package com.example.iptvcpruebadesdecero
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iptvcpruebadesdecero.adapter.CategoriaAdapter
 import com.example.iptvcpruebadesdecero.databinding.ActivityMainBinding
 import com.example.iptvcpruebadesdecero.viewmodel.MainViewModel
+import com.google.android.material.textfield.TextInputEditText
 
 /**
  * Actividad principal de la aplicación que muestra la lista de categorías y canales IPTV.
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity() {
             // Configuración inicial de la actividad
             setupViewModel()
             setupRecyclerView()
+            setupSearch()
             observeViewModel()
             cargarPlaylist()
         } catch (e: Exception) {
@@ -79,6 +82,30 @@ class MainActivity : AppCompatActivity() {
             Log.e("MainActivity", "Error en setupRecyclerView: ${e.message}", e)
             throw e
         }
+    }
+
+    /**
+     * Configura la búsqueda en la actividad.
+     */
+    private fun setupSearch() {
+        binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                val query = binding.searchEditText.text.toString()
+                viewModel.buscarCanales(query)
+                true
+            } else {
+                false
+            }
+        }
+
+        // Búsqueda en tiempo real mientras el usuario escribe
+        binding.searchEditText.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.buscarCanales(s?.toString() ?: "")
+            }
+        })
     }
 
     /**

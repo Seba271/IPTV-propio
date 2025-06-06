@@ -19,41 +19,25 @@ class CanalAdapter(
     private val onCanalClick: (String) -> Unit
 ) : ListAdapter<Canal, CanalAdapter.CanalViewHolder>(CanalDiffCallback()) {
 
-    /**
-     * ViewHolder que maneja la vista de cada elemento del RecyclerView.
-     * Utiliza ViewBinding para acceder a las vistas de manera segura.
-     */
     inner class CanalViewHolder(private val binding: ItemCanalBinding) : 
         RecyclerView.ViewHolder(binding.root) {
         
-        /**
-         * Vincula los datos del canal con las vistas del ViewHolder.
-         * @param canal El canal a mostrar
-         */
         fun bind(canal: Canal) {
-            // Establece el nombre del canal
             binding.tvCanalNombre.text = canal.nombre
             
-            // Carga el logo del canal si existe usando Glide
+            // Cargar logo del canal si existe
             canal.logo?.let { logoUrl ->
                 Glide.with(binding.root)
                     .load(logoUrl)
                     .into(binding.ivCanalLogo)
             }
 
-            // Configura el listener de clic que llama a onCanalClick con la URL del canal
             binding.root.setOnClickListener {
                 onCanalClick(canal.url)
             }
         }
     }
 
-    /**
-     * Crea nuevas instancias de ViewHolder.
-     * @param parent El ViewGroup padre
-     * @param viewType El tipo de vista
-     * @return Una nueva instancia de CanalViewHolder
-     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CanalViewHolder {
         val binding = ItemCanalBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -63,37 +47,16 @@ class CanalAdapter(
         return CanalViewHolder(binding)
     }
 
-    /**
-     * Vincula los datos del canal con el ViewHolder en la posición especificada.
-     * @param holder El ViewHolder a vincular
-     * @param position La posición del elemento en la lista
-     */
     override fun onBindViewHolder(holder: CanalViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 }
 
-/**
- * Clase que implementa DiffUtil.ItemCallback para manejar las comparaciones entre elementos.
- * Se utiliza para optimizar las actualizaciones de la lista.
- */
 class CanalDiffCallback : DiffUtil.ItemCallback<Canal>() {
-    /**
-     * Compara si dos elementos son el mismo basándose en su ID.
-     * @param oldItem El elemento antiguo
-     * @param newItem El elemento nuevo
-     * @return true si los elementos son el mismo, false en caso contrario
-     */
     override fun areItemsTheSame(oldItem: Canal, newItem: Canal): Boolean {
         return oldItem.id == newItem.id
     }
 
-    /**
-     * Compara si el contenido de dos elementos es el mismo.
-     * @param oldItem El elemento antiguo
-     * @param newItem El elemento nuevo
-     * @return true si el contenido es el mismo, false en caso contrario
-     */
     override fun areContentsTheSame(oldItem: Canal, newItem: Canal): Boolean {
         return oldItem == newItem
     }

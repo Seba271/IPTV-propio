@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.iptvcpruebadesdecero.model.Canal
 import com.example.iptvcpruebadesdecero.model.Categoria
 import com.example.iptvcpruebadesdecero.util.M3UParser
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,35 @@ class MainViewModel : ViewModel() {
      */
     val error: LiveData<String> = _error
 
+    // Lista original de categorías para mantener los datos sin filtrar
+    private var categoriasOriginales: List<Categoria> = emptyList()
+
+    /**
+     * Busca canales que coincidan con el texto de búsqueda.
+     * La búsqueda se realiza en el nombre del canal y es insensible a mayúsculas/minúsculas.
+     * 
+     * @param query Texto de búsqueda
+     */
+    fun buscarCanales(query: String) {
+        if (query.isEmpty()) {
+            // Si la búsqueda está vacía, restaurar la lista original
+            _categorias.value = categoriasOriginales
+            return
+        }
+
+        // Filtrar canales que coincidan con la búsqueda
+        val categoriasFiltradas = categoriasOriginales.map { categoria ->
+            val canalesFiltrados = categoria.canales.filter { canal ->
+                canal.nombre.contains(query, ignoreCase = true)
+            }
+            if (canalesFiltrados.isNotEmpty()) {
+                categoria.copy(canales = canalesFiltrados.toMutableList())
+            } else null
+        }.filterNotNull()
+
+        _categorias.value = categoriasFiltradas
+    }
+
     /**
      * Carga la playlist IPTV desde los assets de la aplicación.
      * Este método realiza las siguientes operaciones:
@@ -74,6 +104,8 @@ class MainViewModel : ViewModel() {
                     _error.postValue("No se encontraron canales en la playlist")
                 } else {
                     Log.d("MainViewModel", "Actualizando LiveData con ${categoriasParseadas.size} categorías")
+                    // Guardar las categorías originales
+                    categoriasOriginales = categoriasParseadas
                     _categorias.postValue(categoriasParseadas)
                 }
             } catch (e: Exception) {
