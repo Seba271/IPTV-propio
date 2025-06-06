@@ -12,17 +12,30 @@ import com.example.iptvcpruebadesdecero.adapter.CategoriaAdapter
 import com.example.iptvcpruebadesdecero.databinding.ActivityMainBinding
 import com.example.iptvcpruebadesdecero.viewmodel.MainViewModel
 
+/**
+ * Actividad principal de la aplicación que muestra la lista de categorías y canales IPTV.
+ * Implementa la interfaz de usuario principal y maneja la interacción con el ViewModel.
+ */
 class MainActivity : AppCompatActivity() {
+    // Binding para acceder a las vistas de manera segura
     private lateinit var binding: ActivityMainBinding
+    // ViewModel para manejar la lógica de negocio
     private lateinit var viewModel: MainViewModel
+    // Adaptador para mostrar las categorías y sus canales
     private lateinit var categoriaAdapter: CategoriaAdapter
 
+    /**
+     * Método de inicialización de la actividad.
+     * Configura la interfaz de usuario y carga los datos iniciales.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
+            // Inicialización del ViewBinding
             binding = ActivityMainBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
+            // Configuración inicial de la actividad
             setupViewModel()
             setupRecyclerView()
             observeViewModel()
@@ -33,6 +46,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Configura el ViewModel de la actividad.
+     * Inicializa el ViewModel usando ViewModelProvider.
+     */
     private fun setupViewModel() {
         try {
             viewModel = ViewModelProvider(this)[MainViewModel::class.java]
@@ -42,12 +59,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Configura el RecyclerView y su adaptador.
+     * Inicializa el adaptador con una lista vacía y configura el layout manager.
+     */
     private fun setupRecyclerView() {
         try {
+            // Creación del adaptador con callback para manejar clics en canales
             categoriaAdapter = CategoriaAdapter(emptyList()) { url ->
                 abrirReproductor(url)
             }
 
+            // Configuración del RecyclerView
             binding.recyclerViewCategorias.apply {
                 layoutManager = LinearLayoutManager(this@MainActivity)
                 adapter = categoriaAdapter
@@ -58,14 +81,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Configura los observadores del ViewModel.
+     * Observa cambios en las categorías y errores.
+     */
     private fun observeViewModel() {
         try {
+            // Observador para las categorías
             viewModel.categorias.observe(this) { categorias ->
                 try {
                     if (categorias.isEmpty()) {
+                        // Mostrar mensaje si no hay categorías
                         binding.textViewMensaje.visibility = View.VISIBLE
                         binding.textViewMensaje.text = "No se encontraron canales"
                     } else {
+                        // Actualizar el adaptador con las nuevas categorías
                         binding.textViewMensaje.visibility = View.GONE
                         categoriaAdapter = CategoriaAdapter(categorias) { url ->
                             abrirReproductor(url)
@@ -80,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            // Observador para los errores
             viewModel.error.observe(this) { error ->
                 binding.progressBar.visibility = View.GONE
                 binding.textViewMensaje.visibility = View.VISIBLE
@@ -92,6 +123,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Abre la actividad del reproductor con la URL del canal seleccionado.
+     * @param url URL del stream del canal a reproducir
+     */
     private fun abrirReproductor(url: String) {
         try {
             val intent = Intent(this, PlayerActivity::class.java).apply {
@@ -104,6 +139,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Inicia el proceso de carga de la playlist.
+     * Muestra el indicador de progreso y oculta mensajes anteriores.
+     */
     private fun cargarPlaylist() {
         try {
             binding.progressBar.visibility = View.VISIBLE
