@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
     <!-- Configuración principal de la aplicación -->
     <application
         android:allowBackup="true"
@@ -16,28 +19,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IPTVPruebaDesdeCero"
         android:usesCleartextTraffic="true"
+        android:banner="@drawable/ic_banner"
         tools:targetApi="31">
-        
+
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar">
+            android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar">
+            android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar"
+            android:screenOrientation="landscape">
         </activity>
 
         <activity
             android:name=".PlayerActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar" />
+            android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar"
+            android:screenOrientation="landscape" />
 
     </application>
 
