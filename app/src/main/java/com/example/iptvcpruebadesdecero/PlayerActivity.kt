@@ -38,7 +38,19 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
+        setupLoadingAnimation()
         setupPlayer(url)
+    }
+
+    /**
+     * Configura la animación de carga Lottie.
+     */
+    private fun setupLoadingAnimation() {
+        binding.loadingAnimation.apply {
+            setAnimation("CargaTV - 1749346448115.json")
+            repeatCount = -1 // Repetir indefinidamente
+            playAnimation()
+        }
     }
 
     /**
@@ -52,14 +64,34 @@ class PlayerActivity : AppCompatActivity() {
             // Configurar el media item con la URL del stream
             setMediaItem(MediaItem.fromUri(url))
             
-            // Agregar listener para manejar errores de reproducción
+            // Agregar listener para manejar errores de reproducción y estados
             addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
+                    binding.loadingAnimation.visibility = View.GONE
                     Toast.makeText(
                         this@PlayerActivity,
                         "Error al reproducir el canal: ${error.message}",
                         Toast.LENGTH_LONG
                     ).show()
+                }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    when (playbackState) {
+                        Player.STATE_READY -> {
+                            binding.loadingAnimation.visibility = View.GONE
+                            binding.playerView.visibility = View.VISIBLE
+                        }
+                        Player.STATE_BUFFERING -> {
+                            binding.loadingAnimation.visibility = View.VISIBLE
+                            binding.playerView.visibility = View.VISIBLE
+                        }
+                        Player.STATE_ENDED -> {
+                            binding.loadingAnimation.visibility = View.GONE
+                        }
+                        Player.STATE_IDLE -> {
+                            binding.loadingAnimation.visibility = View.VISIBLE
+                        }
+                    }
                 }
             })
             

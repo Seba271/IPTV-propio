@@ -16,7 +16,7 @@ import com.google.android.material.textfield.TextInputEditText
 
 /**
  * Actividad principal de la aplicación que muestra la lista de categorías y canales IPTV.
- * Implementaaaaa la interfaz de usuario principal y maneja la interacción con el ViewModel.
+ * Implementa la interfaz de usuario principal y maneja la interacción con el ViewModel.
  */
 class MainActivity : AppCompatActivity() {
     // Binding para acceder a las vistas de manera segura
