@@ -35,6 +35,12 @@
         </activity>
 
         <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar"
