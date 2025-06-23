@@ -11,6 +11,8 @@ import java.io.InputStreamReader
  * Convierte el contenido del archivo M3U en una lista de categorías con sus respectivos canales.
  */
 class M3UParser {
+    private val TAG = "M3UParser"
+
     /**
      * Parsea un archivo M3U desde un InputStream y lo convierte en una lista de categorías.
      * 
@@ -39,7 +41,7 @@ class M3UParser {
                                 val id = line.substringAfter("tvg-id=\"").substringBefore("\"").trim()
                                 val logo = line.substringAfter("tvg-logo=\"").substringBefore("\"").trim()
 
-                                Log.d("M3UParser", "Parseando canal: $nombre, categoría: $categoria")
+                                Log.d(TAG, "Parseando canal: $nombre, categoría: $categoria")
 
                                 // Creación del objeto Canal con la información extraída
                                 currentCanal = Canal(
@@ -51,33 +53,36 @@ class M3UParser {
                                 )
                             }
                             // Línea que contiene la URL del stream del canal
-                            line.startsWith("http") -> {
+                            !line.startsWith("#") && line.isNotBlank() -> {
                                 currentCanal?.let { canal ->
+                                    // Usar la URL directamente sin modificarla
+                                    val url = line.trim()
+                                    
                                     // Creación del canal completo con su URL
-                                    val canalCompleto = canal.copy(url = line.trim())
+                                    val canalCompleto = canal.copy(url = url)
                                     // Obtención o creación de la categoría correspondiente
                                     val categoria = categorias.getOrPut(canal.categoria) { Categoria(canal.categoria) }
                                     // Agregar el canal a su categoría
                                     categoria.canales.add(canalCompleto)
-                                    Log.d("M3UParser", "Canal agregado: ${canal.nombre} a categoría: ${canal.categoria}")
+                                    Log.d(TAG, "Canal agregado: ${canal.nombre} a categoría: ${canal.categoria} con URL: $url")
                                 }
                                 currentCanal = null // Resetear el canal actual
                             }
                         }
                     } catch (e: Exception) {
                         // Manejo de errores para cada línea individual
-                        Log.e("M3UParser", "Error al parsear línea $lineCount: ${e.message}")
+                        Log.e(TAG, "Error al parsear línea $lineCount: ${e.message}")
                     }
                 }
             }
         } catch (e: Exception) {
             // Manejo de errores generales del proceso de lectura
-            Log.e("M3UParser", "Error al leer el archivo: ${e.message}", e)
+            Log.e(TAG, "Error al leer el archivo: ${e.message}", e)
             throw e
         }
 
         // Log final con el resultado del proceso
-        Log.d("M3UParser", "Parseo completado. Categorías encontradas: ${categorias.size}")
+        Log.d(TAG, "Parseo completado. Categorías encontradas: ${categorias.size}")
         return categorias.values.toList()
     }
 } 

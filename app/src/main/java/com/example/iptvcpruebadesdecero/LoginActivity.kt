@@ -18,17 +18,19 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val TAG = "LoginActivity"
     
-    // Credenciales por defecto para pruebas
+    // Credenciales por defecto
     private val DEFAULT_USERNAME = "admin"
     private val DEFAULT_PASSWORD = "admin"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate iniciado")
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
         setupViews()
         setupListeners()
+        Log.d(TAG, "onCreate completado")
     }
 
     /**
@@ -36,12 +38,14 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun setupViews() {
         try {
+            Log.d(TAG, "Configurando vistas")
             // Configurar el estado inicial del botón de login
             updateLoginButtonState()
             
             // Configurar el estado inicial de los campos de error
             binding.textInputLayoutUsername.error = null
             binding.textInputLayoutPassword.error = null
+            Log.d(TAG, "Vistas configuradas correctamente")
         } catch (e: Exception) {
             Log.e(TAG, "Error en setupViews: ${e.message}", e)
         }
@@ -52,6 +56,7 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun setupListeners() {
         try {
+            Log.d(TAG, "Configurando listeners")
             // Listener para el botón de login
             binding.buttonLogin.setOnClickListener {
                 performLogin()
@@ -90,6 +95,7 @@ class LoginActivity : AppCompatActivity() {
                     false
                 }
             }
+            Log.d(TAG, "Listeners configurados correctamente")
         } catch (e: Exception) {
             Log.e(TAG, "Error en setupListeners: ${e.message}", e)
         }
@@ -100,6 +106,7 @@ class LoginActivity : AppCompatActivity() {
      */
     private fun performLogin() {
         try {
+            Log.d(TAG, "Iniciando proceso de login")
             val username = binding.editTextUsername.text.toString().trim()
             val password = binding.editTextPassword.text.toString().trim()
 
@@ -120,45 +127,31 @@ class LoginActivity : AppCompatActivity() {
             binding.progressBar.visibility = View.VISIBLE
             binding.buttonLogin.isEnabled = false
 
-            // Simular validación (en una app real, aquí iría la llamada al servidor)
-            validateCredentials(username, password)
+            // Validar credenciales
+            if (username == DEFAULT_USERNAME && password == DEFAULT_PASSWORD) {
+                // Login exitoso
+                Log.d(TAG, "Login exitoso")
+                showSuccess("Login exitoso")
+                
+                // Navegar a MainActivity
+                Log.d(TAG, "Iniciando MainActivity")
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            } else {
+                // Credenciales incorrectas
+                Log.w(TAG, "Credenciales incorrectas")
+                showError("Usuario o contraseña incorrectos")
+                binding.editTextPassword.requestFocus()
+                binding.editTextPassword.selectAll()
+            }
+            
+            // Ocultar progreso y habilitar botón
+            binding.progressBar.visibility = View.GONE
+            binding.buttonLogin.isEnabled = true
+            
         } catch (e: Exception) {
             Log.e(TAG, "Error en performLogin: ${e.message}", e)
             showError("Error durante el login: ${e.message}")
-        }
-    }
-
-    /**
-     * Valida las credenciales del usuario
-     */
-    private fun validateCredentials(username: String, password: String) {
-        try {
-            // Simular delay de red
-            binding.root.postDelayed({
-                if (username == DEFAULT_USERNAME && password == DEFAULT_PASSWORD) {
-                    // Login exitoso
-                    Log.d(TAG, "Login exitoso para usuario: $username")
-                    showSuccess("Login exitoso")
-                    
-                    // Navegar a MainActivity
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    // Credenciales incorrectas
-                    Log.w(TAG, "Credenciales incorrectas para usuario: $username")
-                    showError("Usuario o contraseña incorrectos")
-                    binding.editTextPassword.requestFocus()
-                    binding.editTextPassword.selectAll()
-                }
-                
-                // Ocultar progreso y habilitar botón
-                binding.progressBar.visibility = View.GONE
-                binding.buttonLogin.isEnabled = true
-            }, 1000) // Simular 1 segundo de delay
-        } catch (e: Exception) {
-            Log.e(TAG, "Error en validateCredentials: ${e.message}", e)
-            showError("Error al validar credenciales: ${e.message}")
             binding.progressBar.visibility = View.GONE
             binding.buttonLogin.isEnabled = true
         }

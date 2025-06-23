@@ -3,12 +3,16 @@ package com.example.iptvcpruebadesdecero
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.iptvcpruebadesdecero.databinding.ActivityPlayerBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 
 /**
  * Actividad que maneja la reproducción de streams IPTV.
@@ -60,48 +64,78 @@ class PlayerActivity : AppCompatActivity() {
      * @param url URL del stream a reproducir
      */
     private fun setupPlayer(url: String) {
-        player = ExoPlayer.Builder(this).build().apply {
-            // Configurar el media item con la URL del stream
-            setMediaItem(MediaItem.fromUri(url))
-            
-            // Agregar listener para manejar errores de reproducción y estados
-            addListener(object : Player.Listener {
-                override fun onPlayerError(error: PlaybackException) {
-                    binding.loadingAnimation.visibility = View.GONE
-                    Toast.makeText(
-                        this@PlayerActivity,
-                        "Error al reproducir el canal: ${error.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+        try {
+            // Configurar un User-Agent personalizado para mejorar la compatibilidad
+            val userAgent = "VLC/3.0.0 LibVLC/3.0.0"
+            val httpDataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(userAgent)
+            val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
+            val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
 
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    when (playbackState) {
-                        Player.STATE_READY -> {
-                            binding.loadingAnimation.visibility = View.GONE
-                            binding.playerView.visibility = View.VISIBLE
+            player = ExoPlayer.Builder(this)
+                .setMediaSourceFactory(mediaSourceFactory)
+                .build().apply {
+                // Configurar el media item con la URL del stream
+                setMediaItem(MediaItem.fromUri(url))
+
+                // Agregar listener para manejar errores de reproducción y estados
+                addListener(object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
+                        binding.loadingAnimation.visibility = View.GONE
+                        val cause = error.cause
+                        var errorMessage = "Error al reproducir el canal: ${error.message}"
+                        if (cause != null) {
+                            errorMessage += "\n\nCausa: ${cause.javaClass.simpleName}\n${cause.message}"
                         }
-                        Player.STATE_BUFFERING -> {
-                            binding.loadingAnimation.visibility = View.VISIBLE
-                            binding.playerView.visibility = View.VISIBLE
-                        }
-                        Player.STATE_ENDED -> {
-                            binding.loadingAnimation.visibility = View.GONE
-                        }
-                        Player.STATE_IDLE -> {
-                            binding.loadingAnimation.visibility = View.VISIBLE
+                        android.util.Log.e("PlayerActivity", errorMessage, error)
+
+                        if (!isFinishing) {
+                            AlertDialog.Builder(this@PlayerActivity)
+                                .setTitle("Error de Reproducción")
+                                .setMessage(errorMessage)
+                                .setPositiveButton("Cerrar") { _, _ -> finish() }
+                                .setCancelable(false)
+                                .show()
                         }
                     }
-                }
-            })
-            
-            // Preparar y comenzar la reproducción
-            prepare()
-            playWhenReady = true
-        }
 
-        // Asignar el reproductor a la vista
-        binding.playerView.player = player
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        when (playbackState) {
+                            Player.STATE_READY -> {
+                                binding.loadingAnimation.visibility = View.GONE
+                                binding.playerView.visibility = View.VISIBLE
+                            }
+                            Player.STATE_BUFFERING -> {
+                                binding.loadingAnimation.visibility = View.VISIBLE
+                                binding.playerView.visibility = View.VISIBLE
+                            }
+                            Player.STATE_ENDED -> {
+                                binding.loadingAnimation.visibility = View.GONE
+                            }
+                            Player.STATE_IDLE -> {
+                                binding.loadingAnimation.visibility = View.VISIBLE
+                            }
+                        }
+                    }
+                })
+                
+                // Preparar y comenzar la reproducción
+                prepare()
+                playWhenReady = true
+            }
+            
+            // Asignar el reproductor a la vista
+            binding.playerView.player = player
+        } catch (e: Exception) {
+            android.util.Log.e("PlayerActivity", "Error en setupPlayer", e)
+            if (!isFinishing) {
+                AlertDialog.Builder(this)
+                    .setTitle("Error Crítico del Reproductor")
+                    .setMessage("No se pudo inicializar el reproductor:\n\n${e.message}")
+                    .setPositiveButton("Cerrar") { _, _ -> finish() }
+                    .setCancelable(false)
+                    .show()
+            }
+        }
     }
 
     /**

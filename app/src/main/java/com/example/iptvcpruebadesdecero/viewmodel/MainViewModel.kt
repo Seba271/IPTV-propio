@@ -86,7 +86,7 @@ class MainViewModel : ViewModel() {
             try {
                 // Inicio del proceso de carga
                 Log.d("MainViewModel", "Iniciando carga de playlist")
-                val inputStream = context.assets.open("playlist_matiasprueba_plus.m3u")
+                val inputStream = context.assets.open("playlist_puebactvc_plus (1).m3u")
                 Log.d("MainViewModel", "Archivo playlist encontrado")
                 
                 // Creación del parser y proceso de parseo en un hilo secundario

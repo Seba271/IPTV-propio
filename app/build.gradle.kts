@@ -47,6 +47,7 @@ dependencies {
     // ExoPlayer para reproducción de video
     implementation("com.google.android.exoplayer:exoplayer-core:2.19.1")
     implementation("com.google.android.exoplayer:exoplayer-ui:2.19.1")
+    implementation("com.google.android.exoplayer:exoplayer-hls:2.19.1")
     
     // Glide para cargar imágenes
     implementation("com.github.bumptech.glide:glide:4.16.0")

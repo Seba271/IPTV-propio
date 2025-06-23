@@ -38,7 +38,7 @@
             android:name=".LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.IPTVPruebaDesdeCero.NoActionBar"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="landscape" />
 
         <activity
             android:name=".MainActivity"
