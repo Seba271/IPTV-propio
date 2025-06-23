@@ -128,26 +128,26 @@ class LoginActivity : AppCompatActivity() {
             binding.buttonLogin.isEnabled = false
 
             // Validar credenciales
-            if (username == DEFAULT_USERNAME && password == DEFAULT_PASSWORD) {
-                // Login exitoso
+                if (username == DEFAULT_USERNAME && password == DEFAULT_PASSWORD) {
+                    // Login exitoso
                 Log.d(TAG, "Login exitoso")
-                showSuccess("Login exitoso")
-                
-                // Navegar a MainActivity
+                    showSuccess("Login exitoso")
+                    
+                    // Navegar a MainActivity
                 Log.d(TAG, "Iniciando MainActivity")
                 startActivity(Intent(this, MainActivity::class.java))
-                finish()
-            } else {
-                // Credenciales incorrectas
+                    finish()
+                } else {
+                    // Credenciales incorrectas
                 Log.w(TAG, "Credenciales incorrectas")
-                showError("Usuario o contraseña incorrectos")
-                binding.editTextPassword.requestFocus()
-                binding.editTextPassword.selectAll()
-            }
-            
-            // Ocultar progreso y habilitar botón
-            binding.progressBar.visibility = View.GONE
-            binding.buttonLogin.isEnabled = true
+                    showError("Usuario o contraseña incorrectos")
+                    binding.editTextPassword.requestFocus()
+                    binding.editTextPassword.selectAll()
+                }
+                
+                // Ocultar progreso y habilitar botón
+                binding.progressBar.visibility = View.GONE
+                binding.buttonLogin.isEnabled = true
             
         } catch (e: Exception) {
             Log.e(TAG, "Error en performLogin: ${e.message}", e)

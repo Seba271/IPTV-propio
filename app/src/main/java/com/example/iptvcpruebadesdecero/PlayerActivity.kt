@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
@@ -42,8 +43,15 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
+        binding.backButton.setOnClickListener {
+            finish()
+        }
+
         setupLoadingAnimation()
         setupPlayer(url)
+
+        // Sincronizar el botón de volver con los controles del reproductor
+        // Listener movido a onStart para asegurar que el playerView esté listo.
     }
 
     /**
@@ -145,6 +153,11 @@ class PlayerActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         player?.play()
+
+        // Sincronizar el botón de volver con los controles del reproductor
+        binding.playerView.setControllerVisibilityListener { visibility ->
+            binding.backButton.visibility = visibility
+        }
     }
 
     /**
