@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.iptvcpruebadesdecero.adapter.CategoriaAdapter
 import com.example.iptvcpruebadesdecero.databinding.ActivityMainBinding
+import com.example.iptvcpruebadesdecero.model.Canal
+import com.example.iptvcpruebadesdecero.model.Categoria
 import com.example.iptvcpruebadesdecero.viewmodel.MainViewModel
 import com.google.android.material.textfield.TextInputEditText
 
@@ -25,6 +27,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     // Adaptador para mostrar las categorías y sus canales
     private lateinit var categoriaAdapter: CategoriaAdapter
+    // Almacena la lista completa de categorías para pasarla al reproductor
+    private var todasLasCategorias: List<Categoria> = emptyList()
 
     /**
      * Método de inicialización de la actividad.
@@ -69,8 +73,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         try {
             // Creación del adaptador con callback para manejar clics en canales
-            categoriaAdapter = CategoriaAdapter(emptyList()) { url ->
-                abrirReproductor(url)
+            categoriaAdapter = CategoriaAdapter(emptyList()) { canales, position ->
+                abrirReproductor(canales, position)
             }
 
             // Configuración del RecyclerView
@@ -116,6 +120,7 @@ class MainActivity : AppCompatActivity() {
         try {
             // Observador para las categorías
             viewModel.categorias.observe(this) { categorias ->
+                this.todasLasCategorias = categorias // Guardar la lista completa
                 try {
                     if (categorias.isEmpty()) {
                         // Mostrar mensaje si no hay categorías
@@ -124,8 +129,8 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         // Actualizar el adaptador con las nuevas categorías
                         binding.textViewMensaje.visibility = View.GONE
-                        categoriaAdapter = CategoriaAdapter(categorias) { url ->
-                            abrirReproductor(url)
+                        categoriaAdapter = CategoriaAdapter(categorias) { canales, position ->
+                            abrirReproductor(canales, position)
                         }
                         binding.recyclerViewCategorias.adapter = categoriaAdapter
                     }
@@ -152,12 +157,27 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Abre la actividad del reproductor con la URL del canal seleccionado.
-     * @param url URL del stream del canal a reproducir
+     * @param canalesDeCategoria La lista de canales de la categoría seleccionada
+     * @param positionEnCategoria La posición del canal dentro de su categoría
      */
-    private fun abrirReproductor(url: String) {
+    private fun abrirReproductor(canalesDeCategoria: List<Canal>, positionEnCategoria: Int) {
         try {
+            // 1. Crear una lista aplanada con TODOS los canales de TODAS las categorías
+            val todosLosCanales = todasLasCategorias.flatMap { it.canales }
+
+            // 2. Encontrar el canal que fue clickeado para saber su posición en la lista global
+            val canalClickeado = canalesDeCategoria[positionEnCategoria]
+            val posicionGlobal = todosLosCanales.indexOf(canalClickeado)
+
+            if (posicionGlobal == -1) {
+                Toast.makeText(this, "Error al procesar la lista de canales.", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // 3. Enviar la lista global completa y la posición correcta al reproductor
             val intent = Intent(this, PlayerActivity::class.java).apply {
-                putExtra("url", url)
+                putExtra("canales", ArrayList(todosLosCanales))
+                putExtra("position", posicionGlobal)
             }
             startActivity(intent)
         } catch (e: Exception) {

@@ -1,5 +1,7 @@
 package com.example.iptvcpruebadesdecero.model
 
+import java.io.Serializable
+
 /**
  * Clase de datos que representa un canal de IPTV.
  * Esta clase se utiliza para almacenar y transportar la información de cada canal.
@@ -16,4 +18,4 @@ data class Canal(
     val url: String,
     val logo: String?,
     val categoria: String
-) 
+) : Serializable 

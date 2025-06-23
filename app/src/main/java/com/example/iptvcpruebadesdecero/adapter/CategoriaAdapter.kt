@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.iptvcpruebadesdecero.databinding.ItemCategoriaBinding
 import com.example.iptvcpruebadesdecero.model.Categoria
+import com.example.iptvcpruebadesdecero.model.Canal
 
 /**
  * Adaptador para mostrar una lista de categorías en un RecyclerView.
@@ -17,7 +18,7 @@ import com.example.iptvcpruebadesdecero.model.Categoria
  */
 class CategoriaAdapter(
     private val categorias: List<Categoria>,
-    private val onCanalClick: (String) -> Unit
+    private val onCanalClick: (List<Canal>, Int) -> Unit
 ) : RecyclerView.Adapter<CategoriaAdapter.CategoriaViewHolder>() {
 
     /**
@@ -28,8 +29,8 @@ class CategoriaAdapter(
         RecyclerView.ViewHolder(binding.root) {
         
         // Adaptador para la lista horizontal de canales
-        private val canalAdapter = CanalAdapter { url ->
-            onCanalClick(url)
+        private val canalAdapter = CanalAdapter { canales, position ->
+            onCanalClick(canales, position)
         }
 
         // Inicialización del RecyclerView de canales

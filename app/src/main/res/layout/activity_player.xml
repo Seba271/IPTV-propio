@@ -22,13 +22,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:background="@drawable/button_background_with_border"
+        android:background="@drawable/button_back_bg_selector"
         android:padding="8dp"
         android:src="@android:drawable/ic_menu_revert"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@android:color/white" />
+        app:tint="@color/ic_back_tint_selector" />
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/loadingAnimation"
