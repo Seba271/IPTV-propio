@@ -21,6 +21,8 @@ class CanalAdapter(
     private val onCanalClick: (List<Canal>, Int) -> Unit
 ) : ListAdapter<Canal, CanalAdapter.CanalViewHolder>(CanalDiffCallback()) {
 
+    private var selectedPosition: Int = RecyclerView.NO_POSITION
+
     /**
      * ViewHolder que maneja la vista de cada canal.
      */
@@ -29,7 +31,27 @@ class CanalAdapter(
         
         init {
             itemView.setOnClickListener {
+                val previousPosition = selectedPosition
+                selectedPosition = adapterPosition
+                if (previousPosition >= 0 && previousPosition < itemCount) {
+                    itemView.post { notifyItemChanged(previousPosition) }
+                }
+                if (selectedPosition >= 0 && selectedPosition < itemCount) {
+                    itemView.post { notifyItemChanged(selectedPosition) }
+                }
                 onCanalClick(currentList, adapterPosition)
+            }
+            itemView.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    val previousPosition = selectedPosition
+                    selectedPosition = adapterPosition
+                    if (previousPosition >= 0 && previousPosition < itemCount) {
+                        itemView.post { notifyItemChanged(previousPosition) }
+                    }
+                    if (selectedPosition >= 0 && selectedPosition < itemCount) {
+                        itemView.post { notifyItemChanged(selectedPosition) }
+                    }
+                }
             }
         }
 
@@ -45,6 +67,12 @@ class CanalAdapter(
                 .load(canal.logo)
                 .placeholder(R.drawable.placeholder_channel)
                 .into(binding.ivCanalLogo)
+            // Fondo dinámico
+            if (adapterPosition == selectedPosition) {
+                binding.root.setCardBackgroundColor(0xFFB0B0B0.toInt()) // Gris
+            } else {
+                binding.root.setCardBackgroundColor(0xFFFFFFFF.toInt()) // Blanco
+            }
         }
     }
 
@@ -70,6 +98,11 @@ class CanalAdapter(
      */
     override fun onBindViewHolder(holder: CanalViewHolder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    override fun submitList(list: List<Canal>?) {
+        selectedPosition = RecyclerView.NO_POSITION
+        super.submitList(list)
     }
 }
 

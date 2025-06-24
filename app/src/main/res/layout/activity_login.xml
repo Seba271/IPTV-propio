@@ -75,7 +75,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="text"
                     android:maxLines="1"
-                    android:text="admin"
+                    android:text=""
                     android:textColor="@color/black"
                     android:textColorHint="@color/black" />
 
@@ -101,7 +101,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:text="admin"
+                    android:text=""
                     android:textColor="@color/black"
                     android:textColorHint="@color/black" />
 
@@ -148,6 +148,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
+            android:visibility="gone"
             android:layout_marginTop="16dp">
 
             <TextView

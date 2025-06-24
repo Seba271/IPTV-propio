@@ -72,22 +72,22 @@ class MainViewModel : ViewModel() {
     }
 
     /**
-     * Carga la playlist IPTV desde los assets de la aplicación.
+     * Carga la playlist IPTV desde el almacenamiento interno de la aplicación.
      * Este método realiza las siguientes operaciones:
-     * 1. Abre el archivo M3U desde los assets
+     * 1. Abre el archivo M3U ("downloaded_playlist.m3u") guardado en el login
      * 2. Parsea el contenido usando M3UParser
      * 3. Actualiza el LiveData con las categorías encontradas
      * 4. Maneja los errores que puedan ocurrir durante el proceso
      *
-     * @param context Contexto de la aplicación necesario para acceder a los assets
+     * @param context Contexto de la aplicación necesario para acceder a los archivos internos
      */
     fun cargarPlaylist(context: Context) {
         viewModelScope.launch {
             try {
                 // Inicio del proceso de carga
-                Log.d("MainViewModel", "Iniciando carga de playlist")
-                val inputStream = context.assets.open("playlist_puebactvc_plus (1).m3u")
-                Log.d("MainViewModel", "Archivo playlist encontrado")
+                Log.d("MainViewModel", "Iniciando carga de playlist desde almacenamiento interno")
+                val inputStream = context.openFileInput("downloaded_playlist.m3u")
+                Log.d("MainViewModel", "Archivo de playlist encontrado en almacenamiento interno")
                 
                 // Creación del parser y proceso de parseo en un hilo secundario
                 val parser = M3UParser()

@@ -1,5 +1,6 @@
 package com.example.iptvcpruebadesdecero
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -8,20 +9,25 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.iptvcpruebadesdecero.databinding.ActivityLoginBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * Actividad de login que permite al usuario autenticarse antes de acceder a la aplicación.
- * Credenciales por defecto: usuario: admin, contraseña: admin
+ * El usuario debe ingresar sus credenciales para descargar su lista de reproducción.
  */
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val TAG = "LoginActivity"
     
-    // Credenciales por defecto
-    private val DEFAULT_USERNAME = "admin"
-    private val DEFAULT_PASSWORD = "admin"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate iniciado")
@@ -105,55 +111,91 @@ class LoginActivity : AppCompatActivity() {
      * Realiza la validación de login
      */
     private fun performLogin() {
-        try {
-            Log.d(TAG, "Iniciando proceso de login")
-            val username = binding.editTextUsername.text.toString().trim()
-            val password = binding.editTextPassword.text.toString().trim()
+        Log.d(TAG, "Iniciando proceso de login")
+        val username = binding.editTextUsername.text.toString().trim()
+        val password = binding.editTextPassword.text.toString().trim()
 
-            // Validar campos vacíos
-            if (username.isEmpty()) {
-                binding.textInputLayoutUsername.error = "El usuario es requerido"
-                binding.editTextUsername.requestFocus()
-                return
-            }
+        // Validar campos vacíos
+        if (username.isEmpty()) {
+            binding.textInputLayoutUsername.error = "El usuario es requerido"
+            binding.editTextUsername.requestFocus()
+            return
+        }
 
-            if (password.isEmpty()) {
-                binding.textInputLayoutPassword.error = "La contraseña es requerida"
-                binding.editTextPassword.requestFocus()
-                return
-            }
+        if (password.isEmpty()) {
+            binding.textInputLayoutPassword.error = "La contraseña es requerida"
+            binding.editTextPassword.requestFocus()
+            return
+        }
 
-            // Mostrar progreso
-            binding.progressBar.visibility = View.VISIBLE
-            binding.buttonLogin.isEnabled = false
+        // Mostrar progreso
+        binding.progressBar.visibility = View.VISIBLE
+        binding.buttonLogin.isEnabled = false
 
-            // Validar credenciales
-                if (username == DEFAULT_USERNAME && password == DEFAULT_PASSWORD) {
-                    // Login exitoso
-                Log.d(TAG, "Login exitoso")
-                    showSuccess("Login exitoso")
-                    
-                    // Navegar a MainActivity
-                Log.d(TAG, "Iniciando MainActivity")
-                startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val urlString = "http://iptv.ctvc.cl:80/playlist/$username/$password/m3u_plus?output=hls"
+                val url = URL(urlString)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val inputStream = connection.inputStream
+                    val playlistContent = inputStream.bufferedReader().use { it.readText() }
+                    inputStream.close()
+
+                    // Guardar la playlist en el almacenamiento interno
+                    savePlaylistToFile(playlistContent)
+
+                    withContext(Dispatchers.Main) {
+                        Log.d(TAG, "Login exitoso y playlist guardada")
+                        showSuccess("Login exitoso")
+                        // Navegar a MainActivity
+                        Log.d(TAG, "Iniciando MainActivity")
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                        finish()
+                    }
                 } else {
-                    // Credenciales incorrectas
-                Log.w(TAG, "Credenciales incorrectas")
-                    showError("Usuario o contraseña incorrectos")
-                    binding.editTextPassword.requestFocus()
-                    binding.editTextPassword.selectAll()
+                    withContext(Dispatchers.Main) {
+                        Log.w(TAG, "Error en el login, código de respuesta: $responseCode")
+                        if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                            showError("Usuario o contraseña incorrectos")
+                        } else {
+                            showError("Error en el login: $responseCode")
+                        }
+                    }
                 }
-                
-                // Ocultar progreso y habilitar botón
-                binding.progressBar.visibility = View.GONE
-                binding.buttonLogin.isEnabled = true
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error en performLogin: ${e.message}", e)
-            showError("Error durante el login: ${e.message}")
-            binding.progressBar.visibility = View.GONE
-            binding.buttonLogin.isEnabled = true
+            } catch (e: IOException) {
+                withContext(Dispatchers.Main) {
+                    Log.e(TAG, "Error de red durante el login: ${e.message}", e)
+                    showError("Error de red. Verifique su conexión.")
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e(TAG, "Error inesperado durante el login: ${e.message}", e)
+                    showError("Error inesperado durante el login.")
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    // Ocultar progreso y habilitar botón
+                    binding.progressBar.visibility = View.GONE
+                    binding.buttonLogin.isEnabled = true
+                }
+            }
+        }
+    }
+
+    private fun savePlaylistToFile(content: String) {
+        try {
+            val file = File(filesDir, "downloaded_playlist.m3u")
+            FileOutputStream(file).use {
+                it.write(content.toByteArray())
+            }
+            Log.d(TAG, "Playlist guardada en ${file.absolutePath}")
+        } catch (e: IOException) {
+            Log.e(TAG, "Error al guardar la playlist: ${e.message}", e)
+            throw e // Re-lanzar para que el bloque catch principal lo maneje
         }
     }
 
