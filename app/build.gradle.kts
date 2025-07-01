@@ -43,27 +43,25 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation("com.google.android.material:material:1.11.0")
     implementation(libs.androidx.constraintlayout)
-    
-    // ExoPlayer para reproducción de video
-    implementation("com.google.android.exoplayer:exoplayer-core:2.19.1")
-    implementation("com.google.android.exoplayer:exoplayer-ui:2.19.1")
-    implementation("com.google.android.exoplayer:exoplayer-hls:2.19.1")
-    
+
+    // VLC para reproducción de video (reemplaza ExoPlayer)
+    implementation("org.videolan.android:libvlc-all:3.5.1")
+
     // Glide para cargar imágenes
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    
+
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    
+
     // ViewModel y LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    
+
     // Android TV
     implementation("androidx.tv:tv-foundation:1.0.0-alpha10")
     implementation("androidx.tv:tv-material:1.0.0-alpha10")
-    
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

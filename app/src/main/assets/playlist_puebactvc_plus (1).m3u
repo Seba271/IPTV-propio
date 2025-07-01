@@ -344,7 +344,7 @@ http://iptv.ctvc.cl:80/puebactvc/puebactvc/200.m3u8
 http://iptv.ctvc.cl:80/puebactvc/puebactvc/201.m3u8
 #EXTINF:-1 tvg-id="1403" tvg-name="TNT SPORTS PREMIUM ARGENTINA" tvg-logo="" group-title="DEPORTES",TNT SPORTS PREMIUM ARGENTINA
 http://iptv.ctvc.cl:80/puebactvc/puebactvc/207.m3u8
-#EXTINF:-1 tvg-id="1303" tvg-name="TRECE ARG" tvg-logo="http://iptv.ctvc.cl:80/images/ayfdHaSGfQQ7HLxmvsjLeFhU53efYKCZO27If0TLYNsTnT-8fL4CxhpfDUwDqQyMze83VzGEgaZOaT_kXlw8bg.png" group-title="CULTURA",TRECE ARG
+#EXTINF:-1 tvg-id="1303" tvg-name="TRECE ARG" tvg-logo="" group-title="CULTURA",TRECE ARG
 http://iptv.ctvc.cl:80/puebactvc/puebactvc/208.m3u8
 #EXTINF:-1 tvg-id="" tvg-name="MEGA CINE TV" tvg-logo="" group-title="CANALES-HD",MEGA CINE TV
 http://iptv.ctvc.cl:80/puebactvc/puebactvc/210.m3u8

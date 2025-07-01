@@ -1,35 +1,58 @@
 package com.example.iptvcpruebadesdecero
 
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.iptvcpruebadesdecero.databinding.ActivityPlayerBinding
 import com.example.iptvcpruebadesdecero.model.Canal
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import org.videolan.libvlc.LibVLC
+import org.videolan.libvlc.Media
+import org.videolan.libvlc.MediaPlayer as VLCMediaPlayer
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 
 /**
  * Actividad que maneja la reproducción de streams IPTV.
- * Utiliza ExoPlayer para reproducir el contenido multimedia.
+ * Utiliza VLC para reproducir el contenido multimedia.
  * Implementa un reproductor de video a pantalla completa con controles personalizados.
  */
 class PlayerActivity : AppCompatActivity() {
     // Binding para acceder a las vistas de manera segura
     private lateinit var binding: ActivityPlayerBinding
-    // Instancia del reproductor ExoPlayer
-    private var player: ExoPlayer? = null
 
     // Lista de canales y posición actual
     private var canales: List<Canal> = emptyList()
     private var currentPosition: Int = -1
+
+    // Instancia del reproductor VLC
+    private var libVLC: LibVLC? = null
+    private var vlcPlayer: VLCMediaPlayer? = null
+
+    // Variables para control de UI
+    private var isPlaying = true
+    private var controlsVisible = false
+    private val handler = Handler(Looper.getMainLooper())
+    private val hideControlsRunnable = Runnable { hideControls() }
+    private val splashTimeoutRunnable = Runnable {
+        binding.loadingAnimation.visibility = View.GONE
+        binding.playerView.visibility = View.VISIBLE
+        AlertDialog.Builder(this)
+            .setTitle("Error de carga")
+            .setMessage("No se pudo iniciar la reproducción del canal. Puede que el canal no tenga video o haya un problema de red/codec.")
+            .setPositiveButton("Cerrar") { _, _ -> finish() }
+            .setCancelable(false)
+            .show()
+    }
+    private val updateProgressRunnable = object : Runnable {
+        override fun run() {
+            updateProgressBar()
+            handler.postDelayed(this, 1000)
+        }
+    }
 
     /**
      * Método de inicialización de la actividad.
@@ -55,17 +78,11 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
-        binding.backButton.setOnClickListener {
-            finish()
-        }
-
         setupLoadingAnimation()
-        setupPlayer()
-
-        // Sincronizar el botón de volver con los controles del reproductor
-        binding.playerView.setControllerVisibilityListener { visibility ->
-            binding.backButton.visibility = visibility
-        }
+        setupVLCPlayer()
+        setupControls()
+        setupTouchListener()
+        showControls()
     }
 
     /**
@@ -80,88 +97,283 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     /**
-     * Configura el reproductor ExoPlayer con la URL proporcionada.
+     * Configura los controles personalizados.
+     */
+    private fun setupControls() {
+        // Botón de volver
+        binding.backButton.setOnClickListener {
+            finish()
+        }
+
+        // Botón de pausa/reproducción
+        binding.playPauseButton.setOnClickListener {
+            if (isPlaying) {
+                vlcPlayer?.pause()
+                binding.playPauseButton.setImageResource(android.R.drawable.ic_media_play)
+            } else {
+                vlcPlayer?.play()
+                binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
+            }
+            isPlaying = !isPlaying
+            resetControlsTimer()
+        }
+
+        // Botón de canal anterior
+        binding.previousButton.setOnClickListener {
+            if (currentPosition > 0) {
+                currentPosition--
+                loadChannel(currentPosition)
+            }
+            resetControlsTimer()
+        }
+
+        // Botón de siguiente canal
+        binding.nextButton.setOnClickListener {
+            if (currentPosition < canales.size - 1) {
+                currentPosition++
+                loadChannel(currentPosition)
+            }
+            resetControlsTimer()
+        }
+
+        // Botón de adelantar 5 segundos
+        binding.forwardButton.setOnClickListener {
+            vlcPlayer?.let { player ->
+                val currentTime = player.time
+                player.time = currentTime + 5000
+            }
+            resetControlsTimer()
+        }
+
+        // Botón de retroceder 5 segundos
+        binding.rewindButton.setOnClickListener {
+            vlcPlayer?.let { player ->
+                val currentTime = player.time
+                player.time = maxOf(0, currentTime - 5000)
+            }
+            resetControlsTimer()
+        }
+
+        // Barra de progreso (SeekBar)
+        binding.progressSeekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            var userSeeking = false
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser && vlcPlayer != null && vlcPlayer!!.length > 0) {
+                    val newTime = (progress / 1000.0 * vlcPlayer!!.length).toLong()
+                    binding.currentTimeText.text = formatMillis(newTime)
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {
+                userSeeking = true
+            }
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {
+                userSeeking = false
+                if (vlcPlayer != null && vlcPlayer!!.length > 0) {
+                    val newTime = (seekBar!!.progress / 1000.0 * vlcPlayer!!.length).toLong()
+                    vlcPlayer!!.time = newTime
+                }
+            }
+        })
+    }
+
+    /**
+     * Configura el listener de toques para mostrar/ocultar controles.
+     */
+    private fun setupTouchListener() {
+        binding.playerView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    if (controlsVisible) {
+                        hideControls()
+                    } else {
+                        showControls()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    /**
+     * Muestra los controles y programa su ocultación automática.
+     */
+    private fun showControls() {
+        controlsVisible = true
+        binding.topBarLayout.visibility = View.VISIBLE
+        binding.controlsBar.visibility = View.VISIBLE
+        binding.progressBarLayout.visibility = View.VISIBLE
+        resetControlsTimer()
+    }
+
+    /**
+     * Oculta los controles.
+     */
+    private fun hideControls() {
+        controlsVisible = false
+        binding.topBarLayout.visibility = View.GONE
+        binding.controlsBar.visibility = View.GONE
+        binding.progressBarLayout.visibility = View.GONE
+    }
+
+    /**
+     * Reinicia el timer para ocultar controles automáticamente.
+     */
+    private fun resetControlsTimer() {
+        handler.removeCallbacks(hideControlsRunnable)
+        handler.postDelayed(hideControlsRunnable, 3000) // Ocultar después de 3 segundos
+    }
+
+    /**
+     * Carga un canal específico.
+     */
+    private fun loadChannel(position: Int) {
+        val canal = canales.getOrNull(position)
+        if (canal != null) {
+            binding.channelNameText.text = canal.nombre
+            binding.loadingAnimation.visibility = View.VISIBLE
+            // Detener reproducción actual
+            vlcPlayer?.stop()
+            // Preparar nuevo media
+            val media = Media(libVLC, Uri.parse(canal.url))
+            media.setHWDecoderEnabled(true, false)
+            // Forzar salida de audio a android_audiotrack
+            media.addOption(":aout=android_audiotrack")
+            vlcPlayer?.media = media
+            // Asegurar volumen
+            vlcPlayer?.volume = 100
+            handler.removeCallbacks(splashTimeoutRunnable)
+            handler.postDelayed(splashTimeoutRunnable, 10000)
+            vlcPlayer?.play()
+            // Seleccionar automáticamente la primera pista de audio disponible
+            vlcPlayer?.let { player ->
+                val audioTracks = player.audioTracks
+                if (audioTracks != null && audioTracks.isNotEmpty()) {
+                    val firstTrackId = audioTracks[0].id
+                    player.setAudioTrack(firstTrackId)
+                }
+            }
+            isPlaying = true
+            binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
+            // Iniciar actualización de barra de progreso
+            handler.removeCallbacks(updateProgressRunnable)
+            handler.post(updateProgressRunnable)
+        }
+    }
+
+    /**
+     * Configura el reproductor VLC con la URL proporcionada.
      * Inicializa el reproductor, configura los listeners y comienza la reproducción.
      */
-    private fun setupPlayer() {
+    private fun setupVLCPlayer() {
         try {
-            // Configurar un User-Agent personalizado para mejorar la compatibilidad
-            val userAgent = "VLC/3.0.0 LibVLC/3.0.0"
-            val httpDataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(userAgent)
-            val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
-            val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
+            // Inicializar LibVLC
+            libVLC = LibVLC(this, arrayListOf("--no-drop-late-frames", "--no-skip-frames"))
+            vlcPlayer = VLCMediaPlayer(libVLC)
 
-            // Convertir la lista de Canales a una lista de MediaItems para ExoPlayer
-            val mediaItems = canales.map { MediaItem.fromUri(it.url) }
+            // Obtener la URL del canal actual
+            val canal = canales.getOrNull(currentPosition)
+            if (canal == null) {
+                Toast.makeText(this, "No se pudo obtener el canal.", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
 
-            player = ExoPlayer.Builder(this)
-                .setMediaSourceFactory(mediaSourceFactory)
-                .build().apply {
-                    // Entregar la lista de reproducción completa a ExoPlayer
-                    setMediaItems(mediaItems, this@PlayerActivity.currentPosition, 0L)
+            // Mostrar nombre del canal
+            binding.channelNameText.text = canal.nombre
 
-                    // Agregar listener para manejar errores de reproducción y estados
-                    addListener(object : Player.Listener {
-                        override fun onEvents(player: Player, events: Player.Events) {
-                            if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) {
-                                // El usuario usó los botones de siguiente/anterior
-                                this@PlayerActivity.currentPosition = player.currentMediaItemIndex
-                                // Opcional: actualizar un título si lo tuvieras
-                            }
-                        }
+            // Asignar el VLCVideoLayout al reproductor
+            vlcPlayer?.attachViews(binding.playerView, null, false, false)
 
-                        override fun onPlayerError(error: PlaybackException) {
+            // Preparar el Media
+            val media = Media(libVLC, Uri.parse(canal.url))
+            media.setHWDecoderEnabled(true, false)
+            // Forzar salida de audio a android_audiotrack
+            media.addOption(":aout=android_audiotrack")
+            vlcPlayer?.media = media
+            // Asegurar volumen
+            vlcPlayer?.volume = 100
+            handler.removeCallbacks(splashTimeoutRunnable)
+            handler.postDelayed(splashTimeoutRunnable, 10000)
+
+            // Listener para eventos de VLC
+            vlcPlayer?.setEventListener { event ->
+                runOnUiThread {
+                    when (event.type) {
+                        0x100 -> { // Playing
+                            handler.removeCallbacks(splashTimeoutRunnable)
                             binding.loadingAnimation.visibility = View.GONE
-                            val cause = error.cause
-                            var errorMessage = "Error al reproducir el canal: ${error.message}"
-                            if (cause != null) {
-                                errorMessage += "\n\nCausa: ${cause.javaClass.simpleName}\n${cause.message}"
+                            binding.playerView.visibility = View.VISIBLE
+                            isPlaying = true
+                            binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
+                            // Seleccionar automáticamente la primera pista de audio disponible
+                            vlcPlayer?.let { player ->
+                                val audioTracks = player.audioTracks
+                                if (audioTracks != null && audioTracks.isNotEmpty()) {
+                                    val firstTrackId = audioTracks[0].id
+                                    player.setAudioTrack(firstTrackId)
+                                }
                             }
-                            android.util.Log.e("PlayerActivity", errorMessage, error)
-
-                            if (!isFinishing) {
-                                AlertDialog.Builder(this@PlayerActivity)
-                                    .setTitle("Error de Reproducción")
-                                    .setMessage(errorMessage)
-                                    .setPositiveButton("Cerrar") { _, _ -> finish() }
-                                    .setCancelable(false)
-                                    .show()
-                            }
+                            // Iniciar actualización de barra de progreso
+                            handler.removeCallbacks(updateProgressRunnable)
+                            handler.post(updateProgressRunnable)
                         }
-
-                        override fun onPlaybackStateChanged(playbackState: Int) {
-                            when (playbackState) {
-                                Player.STATE_READY -> {
-                                    binding.loadingAnimation.visibility = View.GONE
-                                    binding.playerView.visibility = View.VISIBLE
-                                }
-                                Player.STATE_BUFFERING -> {
-                                    binding.loadingAnimation.visibility = View.VISIBLE
-                                    binding.playerView.visibility = View.VISIBLE
-                                }
-                                Player.STATE_ENDED -> {
-                                    binding.loadingAnimation.visibility = View.GONE
-                                }
-                                Player.STATE_IDLE -> {
-                                    binding.loadingAnimation.visibility = View.VISIBLE
-                                }
-                            }
+                        0x10C -> { // VIDEO_OUTPUT (268)
+                            handler.removeCallbacks(splashTimeoutRunnable)
+                            binding.loadingAnimation.visibility = View.GONE
+                            binding.playerView.visibility = View.VISIBLE
+                            // Iniciar actualización de barra de progreso
+                            handler.removeCallbacks(updateProgressRunnable)
+                            handler.post(updateProgressRunnable)
                         }
-                    })
-                    
-                    // Preparar y comenzar la reproducción
-                    prepare()
-                    playWhenReady = true
+                        0x103 -> { // Buffering
+                            binding.loadingAnimation.visibility = View.VISIBLE
+                            binding.playerView.visibility = View.VISIBLE
+                        }
+                        0x102 -> { // EndReached
+                            handler.removeCallbacks(splashTimeoutRunnable)
+                            binding.loadingAnimation.visibility = View.GONE
+                            // Detener actualización de barra de progreso
+                            handler.removeCallbacks(updateProgressRunnable)
+                        }
+                        0x101 -> { // Error
+                            handler.removeCallbacks(splashTimeoutRunnable)
+                            binding.loadingAnimation.visibility = View.GONE
+                            AlertDialog.Builder(this)
+                                .setTitle("Error de Reproducción (VLC)")
+                                .setMessage("No se pudo reproducir el canal con VLC.")
+                                .setPositiveButton("Cerrar") { _, _ -> finish() }
+                                .setCancelable(false)
+                                .show()
+                            // Detener actualización de barra de progreso
+                            handler.removeCallbacks(updateProgressRunnable)
+                        }
+                    }
                 }
-            
-            // Asignar el reproductor a la vista
-            binding.playerView.player = player
+            }
+
+            // Reproducir
+            vlcPlayer?.play()
+            // Seleccionar automáticamente la primera pista de audio disponible
+            vlcPlayer?.let { player ->
+                val audioTracks = player.audioTracks
+                if (audioTracks != null && audioTracks.isNotEmpty()) {
+                    val firstTrackId = audioTracks[0].id
+                    player.setAudioTrack(firstTrackId)
+                }
+            }
+            isPlaying = true
+            binding.playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
+            // Iniciar actualización de barra de progreso
+            handler.removeCallbacks(updateProgressRunnable)
+            handler.post(updateProgressRunnable)
         } catch (e: Exception) {
-            android.util.Log.e("PlayerActivity", "Error en setupPlayer", e)
+            handler.removeCallbacks(splashTimeoutRunnable)
+            binding.loadingAnimation.visibility = View.GONE
             if (!isFinishing) {
                 AlertDialog.Builder(this)
-                    .setTitle("Error Crítico del Reproductor")
-                    .setMessage("No se pudo inicializar el reproductor:\n\n${e.message}")
+                    .setTitle("Error Crítico del Reproductor VLC")
+                    .setMessage("No se pudo inicializar el reproductor VLC:\n\n${e.message}")
                     .setPositiveButton("Cerrar") { _, _ -> finish() }
                     .setCancelable(false)
                     .show()
@@ -175,12 +387,7 @@ class PlayerActivity : AppCompatActivity() {
      */
     override fun onStart() {
         super.onStart()
-        player?.play()
-
-        // Sincronizar el botón de volver con los controles del reproductor
-        binding.playerView.setControllerVisibilityListener { visibility ->
-            binding.backButton.visibility = visibility
-        }
+        vlcPlayer?.play()
     }
 
     /**
@@ -189,7 +396,7 @@ class PlayerActivity : AppCompatActivity() {
      */
     override fun onStop() {
         super.onStop()
-        player?.pause()
+        vlcPlayer?.pause()
     }
 
     /**
@@ -198,8 +405,17 @@ class PlayerActivity : AppCompatActivity() {
      */
     override fun onDestroy() {
         super.onDestroy()
-        player?.release()
-        player = null
+        handler.removeCallbacks(hideControlsRunnable)
+        handler.removeCallbacks(splashTimeoutRunnable)
+        handler.removeCallbacks(updateProgressRunnable)
+        try {
+            vlcPlayer?.stop()
+            vlcPlayer?.detachViews()
+            vlcPlayer?.release()
+            libVLC?.release()
+        } catch (_: Exception) {}
+        vlcPlayer = null
+        libVLC = null
     }
 
     /**
@@ -226,5 +442,29 @@ class PlayerActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_FULLSCREEN)
+    }
+
+    private fun updateProgressBar() {
+        vlcPlayer?.let { player ->
+            val duration = player.length
+            val position = player.time
+            if (duration > 0) {
+                val progress = ((position.toDouble() / duration) * 1000).toInt()
+                binding.progressSeekBar.progress = progress
+                binding.currentTimeText.text = formatMillis(position)
+                binding.totalTimeText.text = formatMillis(duration)
+            } else {
+                binding.progressSeekBar.progress = 0
+                binding.currentTimeText.text = "00:00"
+                binding.totalTimeText.text = "00:00"
+            }
+        }
+    }
+
+    private fun formatMillis(millis: Long): String {
+        val totalSeconds = millis / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 } 
