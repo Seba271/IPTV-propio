@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IPTVPruebaDesdeCero"
         android:usesCleartextTraffic="true"
-        android:banner="@drawable/ic_banner"
+        android:banner="@drawable/logo_empresa"
         tools:targetApi="31">
 
         <activity
