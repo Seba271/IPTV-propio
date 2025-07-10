@@ -93,7 +93,7 @@ class MainViewModel : ViewModel() {
                 val parser = M3UParser()
                 val categoriasParseadas = withContext(Dispatchers.IO) {
                     Log.d("MainViewModel", "Iniciando parseo de playlist")
-                    val resultado = parser.parse(inputStream)
+                    val resultado = parser.parse(inputStream, context)
                     Log.d("MainViewModel", "Playlist parseada. Categorías encontradas: ${resultado.size}")
                     resultado
                 }
